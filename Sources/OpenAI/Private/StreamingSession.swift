@@ -41,9 +41,31 @@ final class StreamingSession<ResultType: Codable>: NSObject, Identifiable, URLSe
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        let error: Error? = if let error {
+            error
+        } else if let code = (task.response as? HTTPURLResponse)?.statusCode, !(200..<300).contains(code) || code == 204 {
+            APIErrorCode(code: code)
+        } else {
+            nil
+        }
         onComplete?(self, error)
     }
-    
+
+    func urlSession(
+        _ session: URLSession,
+        dataTask: URLSessionDataTask,
+        didReceive response: URLResponse,
+        completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
+    ) {
+        guard let statusCode = (response as? HTTPURLResponse)?.statusCode else { return completionHandler(.cancel) }
+        if (200..<300).contains(statusCode) && statusCode != 204 {
+            completionHandler(.allow)
+        } else {
+            onProcessingError?(self, APIErrorCode(code: statusCode))
+            completionHandler(.cancel)
+        }
+    }
+
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         if ResultType.self == AudioSpeechResult.self, let result = AudioSpeechResult(audio: data) as? ResultType {
             onReceiveContent?(self, result)
