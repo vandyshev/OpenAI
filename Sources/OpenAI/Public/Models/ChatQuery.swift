@@ -115,19 +115,19 @@ public struct ChatQuery: Equatable, Codable, Streamable {
         case assistant(Self.ChatCompletionAssistantMessageParam)
         case tool(Self.ChatCompletionToolMessageParam)
 
-        public var content: Self.ChatCompletionUserMessageParam.Content? { get { // TODO: String type except for .user
+        public var content: Either<Self.ChatCompletionUserMessageParam.Content, [Self.ChatCompletionUserMessageParam.Content]>? { get { // TODO: String type except for .user
             switch self {
             case .system(let systemMessage):
-                return Self.ChatCompletionUserMessageParam.Content.string(systemMessage.content)
+                return .left(Self.ChatCompletionUserMessageParam.Content.string(systemMessage.content))
             case .user(let userMessage):
                 return userMessage.content // TODO: Content type
             case .assistant(let assistantMessage):
                 if let content = assistantMessage.content {
-                    return Self.ChatCompletionUserMessageParam.Content.string(content)
+                    return .left(Self.ChatCompletionUserMessageParam.Content.string(content))
                 }
                 return nil
             case .tool(let toolMessage):
-                return Self.ChatCompletionUserMessageParam.Content.string(toolMessage.content)
+                return .left(Self.ChatCompletionUserMessageParam.Content.string(toolMessage.content))
             }
         }}
 
@@ -191,10 +191,21 @@ public struct ChatQuery: Equatable, Codable, Streamable {
                     return nil
                 }
             case .user:
+                var result: ChatQuery.ChatCompletionMessageParam?
                 if let content {
-                    self = .user(.init(content: .init(string: content), name: name))
+                    result = .user(.init(content: .left(.init(string: content)), name: name))
                 } else if let imageUrl {
-                    self = .user(.init(content: .init(chatCompletionContentPartImageParam: .init(imageUrl: .init(url: imageUrl.absoluteString, detail: .auto))), name: name))
+                    if let content = result?.content?.left {
+                        result = .user(.init(content: .right([
+                            content,
+                            .init(chatCompletionContentPartImageParam: .init(imageUrl: .init(url: imageUrl.absoluteString, detail: .auto)))
+                        ])))
+                    } else {
+                        result = .user(.init(content: .left(.init(chatCompletionContentPartImageParam: .init(imageUrl: .init(url: imageUrl.absoluteString, detail: .auto)))), name: name))
+                    }
+                }
+                if let result {
+                    self = result
                 } else {
                     return nil
                 }
@@ -222,7 +233,7 @@ public struct ChatQuery: Equatable, Codable, Streamable {
         }
 
         private init?(
-            content: Self.ChatCompletionUserMessageParam.Content,
+            content: Either<Self.ChatCompletionUserMessageParam.Content, [Self.ChatCompletionUserMessageParam.Content]>,
             role: Role,
             name: String? = nil
         ) {
@@ -308,14 +319,14 @@ public struct ChatQuery: Equatable, Codable, Streamable {
             public typealias Role = ChatQuery.ChatCompletionMessageParam.Role
 
             /// The contents of the user message.
-            public let content: Content
+            public let content: Either<Content, [Content]>
             /// The role of the messages author, in this case user.
             public let role: Self.Role = .user
             /// An optional name for the participant. Provides the model information to differentiate between participants of the same role.
             public let name: String?
 
             public init(
-                content: Content,
+                content: Either<Content, [Content]>,
                 name: String? = nil
             ) {
                 self.content = content
