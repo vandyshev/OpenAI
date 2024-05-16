@@ -420,7 +420,7 @@ public struct ChatQuery: Equatable, Codable, Streamable {
 
                     public init(imageUrl: ImageURL) {
                         self.imageUrl = imageUrl
-                        self.type = "imageUrl"
+                        self.type = "image_url"
                     }
 
                     public struct ImageURL: Codable, Equatable {
