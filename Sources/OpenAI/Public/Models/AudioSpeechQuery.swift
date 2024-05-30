@@ -51,21 +51,32 @@ public struct AudioSpeechQuery: Codable {
     /// The speed of the generated audio. Select a value from **0.25** to **4.0**. **1.0** is the default.
     /// Defaults to 1
     public let speed: String?
-    
+
+    public let user: String?
+
     public enum CodingKeys: String, CodingKey {
         case model
         case input
         case voice
         case responseFormat = "response_format"
         case speed
+        case user
     }
 
-    public init(model: Model, input: String, voice: AudioSpeechVoice, responseFormat: AudioSpeechResponseFormat = .mp3, speed: Double?) {
+    public init(
+        model: Model,
+        input: String,
+        voice: AudioSpeechVoice,
+        responseFormat: AudioSpeechResponseFormat = .mp3,
+        speed: Double?,
+        user: String?
+    ) {
         self.model = AudioSpeechQuery.validateSpeechModel(model)
         self.speed = AudioSpeechQuery.normalizeSpeechSpeed(speed)
         self.input = input
         self.voice = voice
         self.responseFormat = responseFormat
+        self.user = user
     }
 }
 

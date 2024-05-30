@@ -8,14 +8,14 @@
 import Foundation
 
 public struct AudioTranscriptionQuery: Codable {
-
-public enum ResponseFormat: String, Codable, Equatable, CaseIterable {
-    case json
-    case text
-    case verboseJson = "verbose_json"
-    case srt
-    case vtt
-}
+    
+    public enum ResponseFormat: String, Codable, Equatable, CaseIterable {
+        case json
+        case text
+        case verboseJson = "verbose_json"
+        case srt
+        case vtt
+    }
 
     /// The audio file object (not file name) to transcribe, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.
     public let file: Data
@@ -34,7 +34,18 @@ public enum ResponseFormat: String, Codable, Equatable, CaseIterable {
     /// https://platform.openai.com/docs/guides/speech-to-text/prompting
     public let language: String?
 
-    public init(file: Data, fileType: Self.FileType, model: Model, prompt: String? = nil, temperature: Double? = nil, language: String? = nil, responseFormat: Self.ResponseFormat? = nil) {
+    public let user: String?
+
+    public init(
+        file: Data,
+        fileType: Self.FileType,
+        model: Model,
+        prompt: String? = nil,
+        temperature: Double? = nil,
+        language: String? = nil,
+        responseFormat: Self.ResponseFormat? = nil,
+        user: String?
+    ) {
         self.file = file
         self.fileType = fileType
         self.model = model
@@ -42,6 +53,7 @@ public enum ResponseFormat: String, Codable, Equatable, CaseIterable {
         self.temperature = temperature
         self.language = language
         self.responseFormat = responseFormat
+        self.user = user
     }
 
     public enum FileType: String, Codable, Equatable, CaseIterable {
