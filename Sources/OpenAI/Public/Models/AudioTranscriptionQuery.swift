@@ -100,7 +100,8 @@ extension AudioTranscriptionQuery: MultipartFormDataBodyEncodable {
             .string(paramName: "prompt", value: prompt),
             .string(paramName: "temperature", value: temperature),
             .string(paramName: "language", value: language),
-            .string(paramName: "response_format", value: responseFormat)
+            .string(paramName: "response_format", value: responseFormat),
+            .string(paramName: "user", value: user)
         ])
         return bodyBuilder.build()
     }
