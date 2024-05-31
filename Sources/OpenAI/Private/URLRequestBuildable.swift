@@ -14,5 +14,10 @@ protocol URLRequestBuildable {
     
     associatedtype ResultType
     
-    func build(token: String, organizationIdentifier: String?, timeoutInterval: TimeInterval) throws -> URLRequest
+    func build(
+        token: String,
+        organizationIdentifier: String?,
+        user: String?,
+        timeoutInterval: TimeInterval
+    ) throws -> URLRequest
 }

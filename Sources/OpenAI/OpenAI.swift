@@ -22,15 +22,17 @@ final public class OpenAI: OpenAIProtocol {
         
         /// API host. Set this property if you use some kind of proxy or your own server. Default is api.openai.com
         public let host: String
+        public let user: String?
         public let port: Int
         public let pathPrefix: String
         public let scheme: String
         /// Default request timeout
         public let timeoutInterval: TimeInterval
         
-        public init(token: String, organizationIdentifier: String? = nil, host: String = "api.openai.com", port: Int = 443, pathPrefix: String = "", scheme: String = "https", timeoutInterval: TimeInterval = 60.0) {
+        public init(token: String, user: String? = nil, organizationIdentifier: String? = nil, host: String = "api.openai.com", port: Int = 443, pathPrefix: String = "", scheme: String = "https", timeoutInterval: TimeInterval = 60.0) {
             self.token = token
             self.organizationIdentifier = organizationIdentifier
+            self.user = user
             self.host = host
             self.port = port
             self.scheme = scheme
@@ -139,6 +141,7 @@ extension OpenAI {
         do {
             let request = try request.build(token: configuration.token, 
                                             organizationIdentifier: configuration.organizationIdentifier,
+                                            user: configuration.user,
                                             timeoutInterval: configuration.timeoutInterval)
             let task = session.dataTask(with: request) { data, _, error in
                 if let error = error {
@@ -164,6 +167,7 @@ extension OpenAI {
         do {
             let request = try request.build(token: configuration.token, 
                                             organizationIdentifier: configuration.organizationIdentifier,
+                                            user: configuration.user,
                                             timeoutInterval: configuration.timeoutInterval)
             let session = StreamingSession<ResultType>(urlRequest: request, sslDelegate: sslStreamingDelegate)
             session.onReceiveContent = { _, object in
@@ -187,6 +191,7 @@ extension OpenAI {
         do {
             let request = try request.build(token: configuration.token, 
                                             organizationIdentifier: configuration.organizationIdentifier,
+                                            user: configuration.user,
                                             timeoutInterval: configuration.timeoutInterval)
             
             let task = session.dataTask(with: request) { data, _, error in
@@ -213,6 +218,7 @@ extension OpenAI {
         do {
             let request = try request.build(token: configuration.token,
                                             organizationIdentifier: configuration.organizationIdentifier,
+                                            user: configuration.user,
                                             timeoutInterval: configuration.timeoutInterval)
             let session = StreamingSession<AudioSpeechResult>(urlRequest: request, sslDelegate: sslStreamingDelegate)
             session.onReceiveContent = { _, object in
