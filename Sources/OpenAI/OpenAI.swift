@@ -193,7 +193,12 @@ extension OpenAI {
                     return completion(.failure(OpenAIError.emptyData))
                 }
                 
-                completion(.success(AudioSpeechResult(audio: data)))
+                let decoder = JSONDecoder()
+                if let error = try? decoder.decode(APIErrorResponse.self, from: data) {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(AudioSpeechResult(audio: data)))
+                }
             }
             task.resume()
         } catch {
